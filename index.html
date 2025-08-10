@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urbanis.IO | Desarrollo de Aplicaciones en Puerto Rico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        secondary: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            scroll-behavior: smooth;
+        }
+        
+        .hero-pattern {
+            background: radial-gradient(circle, rgba(14,165,233,0.1) 0%, rgba(255,255,255,0) 70%);
+        }
+        
+        .dark .hero-pattern {
+            background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(15,23,42,0) 70%);
+        }
+        
+        .drawing-canvas {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            cursor: crosshair;
+            background-color: white;
+        }
+        
+        .dark .drawing-canvas {
+            border: 2px solid #334155;
+            background-color: #1e293b;
+        }
+        
+        .glow {
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.4);
+        }
+        
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-slate-100">
+    <!-- Barra de navegación -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md dark:bg-slate-800/80 py-4 px-6 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="bg-primary-500 w-10 h-10 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-xl">U</span>
+                </div>
+                <span class="text-xl font-bold text-primary-600 dark:text-primary-400">Urbanis<span class="text-secondary-600 dark:text-secondary-400">.IO</span></span>
+            </div>
+            
+            <div class="hidden md:flex space-x-8">
+                <a href="#inicio" class="hover:text-primary-500 transition">Inicio</a>
+                <a href="#servicios" class="hover:text-primary-500 transition">Servicios</a>
+                <a href="#demo" class="hover:text-primary-500 transition">Demos</a>
+                <a href="#nosotros" class="hover:text-primary-500 transition">Nosotros</a>
+                <a href="#contacto" class="hover:text-primary-500 transition">Contacto</a>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 transition">
+                    <svg id="theme-icon" class="w-5 h-5 text-gray-800 dark:text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
+                        <path id="theme-path" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                    </svg>
+                </button>
+                
+                <button class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition">
+                    Contáctanos
+                </button>
+                
+                <button class="md:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sección Hero -->
+    <section id="inicio" class="hero-pattern pt-32 pb-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center">
+                <div class="lg:w-1/2 mb-12 lg:mb-0">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                        Desarrollo de Apps <span class="text-primary-600">Innovadoras</span> en <span class="text-secondary-600">Puerto Rico</span>
+                    </h1>
+                    <p class="text-lg md:text-xl mt-6 text-gray-600 dark:text-gray-300 max-w-2xl">
+                        Transformamos ideas en soluciones digitales poderosas. Especialistas en desarrollo móvil, web y software empresarial para impulsar tu negocio.
+                    </p>
+                    <div class="flex flex-wrap gap-4 mt-10">
+                        <button class="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3 rounded-lg font-medium text-lg transition transform hover:-translate-y-1">
+                            Nuestros Proyectos
+                        </button>
+                        <button class="border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-8 py-3 rounded-lg font-medium text-lg transition transform hover:-translate-y-1">
+                            Solicitar Demo
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 flex justify-center">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-primary-500 rounded-2xl opacity-20 blur-xl"></div>
+                        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-2 overflow-hidden">
+                            <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-80 md:h-96" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios -->
+    <section id="servicios" class="py-20 bg-gray-100 dark:bg-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Nuestros <span class="text-primary-600">Servicios</span></h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Soluciones tecnológicas adaptadas a las necesidades de tu empresa
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
+                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Desarrollo de Apps Móviles</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Creamos aplicaciones nativas e híbridas para iOS y Android con interfaces intuitivas y alto rendimiento.
+                    </p>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Desarrollo iOS y Android
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            React Native y Flutter
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Integración con APIs
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
+                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Desarrollo Web</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Sitios web y aplicaciones modernas con las últimas tecnologías para una experiencia de usuario excepcional.
+                    </p>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            React, Angular y Vue.js
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Progressive Web Apps
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            E-commerce y SaaS
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
+                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Software Empresarial</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Soluciones personalizadas para optimizar procesos, mejorar la productividad y tomar decisiones basadas en datos.
+                    </p>
+                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Sistemas de gestión
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Automatización de procesos
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Dashboards y Business Intelligence
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demos Interactivas -->
+    <section id="demo" class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Demos <span class="text-secondary-600">Interactivas</span></h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Experimenta con algunos de los elementos UI que implementamos en nuestras aplicaciones
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <!-- Demo 1: Slider Personalizable -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6">Personalizador de UI</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-medium">Tamaño de Elementos</label>
+                                <span id="size-value" class="text-primary-500 font-bold">50%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="size-slider">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-medium">Opacidad</label>
+                                <span id="opacity-value" class="text-primary-500 font-bold">75%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="75" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="opacity-slider">
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="font-medium">Radio de Bordes</label>
+                                <span id="radius-value" class="text-primary-500 font-bold">8px</span>
+                            </div>
+                            <input type="range" min="0" max="20" value="8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="radius-slider">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 p-6 bg-gray-100 dark:bg-slate-700 rounded-lg flex justify-center">
+                        <div id="demo-element" class="w-32 h-32 bg-primary-500 flex items-center justify-center text-white font-bold" style="opacity: 0.75; border-radius: 8px;">
+                            Demo
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Demo 2: Dibujo Canvas -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold mb-6">Canvas de Dibujo</h3>
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <button id="draw-btn" class="px-4 py-2 bg-primary-500 text-white rounded-lg font-medium">Dibujar</button>
+                        <button id="erase-btn" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded-lg font-medium">Borrar</button>
+                        <button id="clear-btn" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded-lg font-medium">Limpiar</button>
+                        <div class="flex items-center">
+                            <label class="mr-2">Color:</label>
+                            <input type="color" id="draw-color" value="#0ea5e9" class="w-8 h-8 cursor-pointer">
+                        </div>
+                        <div class="flex items-center">
+                            <label class="mr-2">Grosor:</label>
+                            <input type="range" min="1" max="20" value="5" id="draw-width" class="w-24">
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-300 dark:border-slate-600 rounded-lg p-1">
+                        <canvas id="drawing-canvas" class="drawing-canvas w-full h-80"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nosotros -->
+    <section id="nosotros" class="py-20 bg-gray-100 dark:bg-slate-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-secondary-500 rounded-2xl opacity-10 blur-xl"></div>
+                        <div class="relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl overflow-hidden">
+                            <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-80" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Sobre <span class="text-primary-600">Urbanis.IO</span></h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                        Somos un equipo apasionado de desarrolladores, diseñadores y estrategas digitales con sede en el corazón de Puerto Rico.
+                    </p>
+                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
+                        Desde 2015, hemos estado creando soluciones digitales que transforman negocios y mejoran la vida de las personas. Combinamos la creatividad caribeña con tecnología de vanguardia para ofrecer productos excepcionales.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-6 mt-8">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">+150 Proyectos</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Entregados con éxito</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">+50 Clientes</h4>
+                                <p class="text-gray-600 dark:text-gray-300">En Puerto Rico y EEUU</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">100K+ Descargas</h4>
+                                <p class="text-gray-600 dark:text-gray-300">En tiendas de apps</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Seguridad</h4>
+                                <p class="text-gray-600 dark:text-gray-300">Certificaciones de protección</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contacto" class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Contácta a <span class="text-primary-600">Urbanis.IO</span></h2>
+                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                ¿Listo para transformar tu idea en una solución digital? ¡Hablemos!
+                </p>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xl font-bold mb-6">Información de Contacto</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Teléfono</h4>
+                                    <p class="text-gray-600 dark:text-gray-300">+1 (787) 555-0123</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Email</h4>
+                                    <p class="text-gray-600 dark:text-gray-300">contacto@urbanis.io</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
+                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Oficina</h4>
+                                    <p class="text-gray-600 dark:text-gray-300">San Juan, Puerto Rico</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <h4 class="font-bold mb-4">Síguenos</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
+                                    </svg>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm-2 15v-4H7v-4h3V8.012C10 6.55 10.812 5 13 5c1.2 0 1.802.4 1.802.4L14 8h-1.5c-.594 0-1.5.15-1.5 1.2V11h3.5l-.5 4h-3v6z"></path>
+                                    </svg>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path>
+                                    </svg>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm-2 15v-6H7v6h3zm-1.5-7.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 7.268h-3v-3.5c0-1.4-.5-2.4-1.8-2.4-1 0-1.6.7-1.9 1.3-.1.2-.1.5-.1.7v3.9h-3V9h3v1.8c.6-.9 1.6-1.8 3.5-1.8 2.3 0 4 1.5 4 4.7v5.3z"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-bold mb-6">Envíanos un Mensaje</h3>
+                        <form>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="name">Nombre</label>
+                                <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="email">Email</label>
+                                <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="message">Mensaje</label>
+                                <textarea id="message" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 rounded-lg transition">
+                                Enviar Mensaje
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <div class="bg-primary-500 w-8 h-8 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold">U</span>
+                        </div>
+                        <span class="text-xl font-bold text-white">Urbanis<span class="text-secondary-400">.IO</span></span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Desarrollando el futuro digital de Puerto Rico.
+                    </p>
+                    <p class="text-gray-400">
+                        &copy; 2023 Urbanis.IO. Todos los derechos reservados.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Enlaces Rápidos</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#inicio" class="text-gray-400 hover:text-white transition">Inicio</a></li>
+                        <li><a href="#servicios" class="text-gray-400 hover:text-white transition">Servicios</a></li>
+                        <li><a href="#demo" class="text-gray-400 hover:text-white transition">Demos</a></li>
+                        <li><a href="#nosotros" class="text-gray-400 hover:text-white transition">Nosotros</a></li>
+                        <li><a href="#contacto" class="text-gray-400 hover:text-white transition">Contacto</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Servicios</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Apps Móviles</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Desarrollo Web</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Software Empresarial</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">UI/UX Design</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Consultoría Tecnológica</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Suscríbete</h4>
+                    <p class="text-gray-400 mb-4">
+                        Recibe las últimas novedades sobre tecnología y desarrollo.
+                    </p>
+                    <div class="flex">
+                        <input type="email" placeholder="Tu email" class="px-4 py-2 rounded-l-lg w-full text-gray-800">
+                        <button class="bg-primary-500 hover:bg-primary-600 px-4 py-2 rounded-r-lg font-medium">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    const offset = 80; // Adjust for fixed header
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Toggle de tema oscuro/claro
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themePath = document.getElementById('theme-path');
+        
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themePath.setAttribute('d', 'M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+                themePath.setAttribute('d', 'M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+                themePath.setAttribute('d', 'M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z');
+            }
+        });
+        
+        // Demo de slider personalizable
+        const sizeSlider = document.getElementById('size-slider');
+        const opacitySlider = document.getElementById('opacity-slider');
+        const radiusSlider = document.getElementById('radius-slider');
+        const sizeValue = document.getElementById('size-value');
+        const opacityValue = document.getElementById('opacity-value');
+        const radiusValue = document.getElementById('radius-value');
+        const demoElement = document.getElementById('demo-element');
+        
+        sizeSlider.addEventListener('input', function() {
+            const value = sizeSlider.value;
+            sizeValue.textContent = `${value}%`;
+            const size = 80 + (value * 1.2);
+            demoElement.style.width = `${size}px`;
+            demoElement.style.height = `${size}px`;
+        });
+        
+        opacitySlider.addEventListener('input', function() {
+            const value = opacitySlider.value;
+            opacityValue.textContent = `${value}%`;
+            demoElement.style.opacity = value / 100;
+        });
+        
+        radiusSlider.addEventListener('input', function() {
+            const value = radiusSlider.value;
+            radiusValue.textContent = `${value}px`;
+            demoElement.style.borderRadius = `${value}px`;
+        });
+        
+        // Demo de dibujo en canvas
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let drawColor = '#0ea5e9';
+        let drawWidth = 5;
+        
+        // Ajustar tamaño del canvas
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Configurar estilo inicial
+        ctx.strokeStyle = drawColor;
+        ctx.lineWidth = drawWidth;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        
+        // Funciones de dibujo
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+        
+        function stopDrawing() {
+            isDrawing = false;
+        }
+        
+        // Event listeners para dibujar
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // Botones de dibujo
+        document.getElementById('draw-btn').addEventListener('click', function() {
+            ctx.strokeStyle = drawColor;
+            ctx.globalCompositeOperation = 'source-over';
+        });
+        
+        document.getElementById('erase-btn').addEventListener('click', function() {
+            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff';
+            ctx.globalCompositeOperation = 'destination-out';
+        });
+        
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        // Cambio de color y grosor
+        document.getElementById('draw-color').addEventListener('input', function(e) {
+            drawColor = e.target.value;
+            ctx.strokeStyle = drawColor;
+        });
+        
+        document.getElementById('draw-width').addEventListener('input', function(e) {
+            drawWidth = e.target.value;
+            ctx.lineWidth = drawWidth;
+        });
+    </script>
+</body>
+</html>

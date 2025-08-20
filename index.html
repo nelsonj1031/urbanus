@@ -1,730 +1,1316 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urbanus.IO | Desarrollo de Aplicaciones en Puerto Rico</title>
+    <title>urbanus.IO | Developer Showcase</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        },
-                        secondary: {
-                            50: '#fdf2f8',
-                            100: '#fce7f3',
-                            200: '#fbcfe8',
-                            300: '#f9a8d4',
-                            400: '#f472b6',
-                            500: '#ec4899',
-                            600: '#db2777',
-                            700: '#be185d',
-                            800: '#9d174d',
-                            900: '#831843',
-                        }
+                        primary: '#00ff9d',
+                        dark: '#0a0a12',
+                        darker: '#06060d',
+                        accent: '#5765ff'
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         body {
-            font-family: 'Poppins', sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-            scroll-behavior: smooth;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #0a0a12, #06060d);
+            color: #f0f0f0;
+            overflow-x: hidden;
         }
         
-        .hero-pattern {
-            background: radial-gradient(circle, rgba(14,165,233,0.1) 0%, rgba(255,255,255,0) 70%);
+        .gradient-text {
+            background: linear-gradient(45deg, #00ff9d, #5765ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        .dark .hero-pattern {
-            background: radial-gradient(circle, rgba(14,165,233,0.15) 0%, rgba(15,23,42,0) 70%);
+        .card-gradient {
+            background: linear-gradient(145deg, rgba(28, 28, 40, 0.8), rgba(16, 16, 24, 0.5));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
-        .drawing-canvas {
-            border: 2px solid #e2e8f0;
-            border-radius: 0.5rem;
-            cursor: crosshair;
-            background-color: white;
+        .app-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(87, 101, 255, 0.3);
         }
         
-        .dark .drawing-canvas {
-            border: 2px solid #334155;
-            background-color: #1e293b;
+        .threejs-container {
+            min-height: 350px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .feature-pulse {
+            animation: pulse 4s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.2); }
+            50% { box-shadow: 0 0 0 15px rgba(0, 255, 157, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
         }
         
         .glow {
-            box-shadow: 0 0 25px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 0 20px rgba(87, 101, 255, 0.3);
         }
         
-        .card {
-            transition: transform 0.3s, box-shadow 0.3s;
+        .animated-button {
+            transition: all 0.3s ease;
+            background: linear-gradient(to right, #00ff9d, #5765ff);
         }
         
-        .card:hover {
-            transform: translateY(-5px);
+        .animated-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(87, 101, 255, 0.4);
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 dark:bg-slate-900 dark:text-slate-100">
-    <!-- Barra de navegación -->
-    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md dark:bg-slate-800/80 py-4 px-6 shadow-sm">
+<body>
+    <!-- Navegación -->
+    <nav class="fixed w-full z-50 bg-[rgba(10,10,18,0.8)] backdrop-blur-lg border-b border-gray-800 py-4 px-6">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-2">
-                <div class="bg-primary-500 w-10 h-10 rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">U</span>
+                <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                    <span class="font-bold text-darker">U</span>
                 </div>
-                <span class="text-xl font-bold text-primary-600 dark:text-primary-400">Urbanus<span class="text-secondary-600 dark:text-secondary-400">.IO</span></span>
+                <span class="text-xl font-bold">urbanus<span class="text-primary">.IO</span></span>
             </div>
-            
             <div class="hidden md:flex space-x-8">
-                <a href="#inicio" class="hover:text-primary-500 transition">Inicio</a>
-                <a href="#servicios" class="hover:text-primary-500 transition">Servicios</a>
-                <a href="#demo" class="hover:text-primary-500 transition">Demos</a>
-                <a href="#nosotros" class="hover:text-primary-500 transition">Nosotros</a>
-                <a href="#contacto" class="hover:text-primary-500 transition">Contacto</a>
+                <a href="#services" class="hover:text-primary transition">Servicios</a>
+                <a href="#demos" class="hover:text-primary transition">Demos</a>
+                <a href="#widgets" class="hover:text-primary transition">Widgets</a>
+                <a href="#ui" class="hover:text-primary transition">Ejemplos de UI</a>
+                <a href="#interactive" class="hover:text-primary transition">Interactivo</a>
+                <a href="#3d" class="hover:text-primary transition">Vitrina 3D</a>
             </div>
-            
-            <div class="flex items-center space-x-4">
-                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 transition">
-                    <svg id="theme-icon" class="w-5 h-5 text-gray-800 dark:text-yellow-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path id="theme-path" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
-                    </svg>
-                </button>
-                
-                <button class="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-medium transition">
-                    Contáctanos
-                </button>
-                
-                <button class="md:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
+            <button class="px-6 py-2 bg-primary text-darker font-semibold rounded-lg">Comenzar</button>
         </div>
     </nav>
 
-    <!-- Sección Hero -->
-    <section id="inicio" class="hero-pattern pt-32 pb-20">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col lg:flex-row items-center">
-                <div class="lg:w-1/2 mb-12 lg:mb-0">
-                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                        Desarrollo de Apps <span class="text-primary-600">Innovadoras</span> en <span class="text-secondary-600">Puerto Rico</span>
-                    </h1>
-                    <p class="text-lg md:text-xl mt-6 text-gray-600 dark:text-gray-300 max-w-2xl">
-                        Transformamos ideas en soluciones digitales poderosas. Especialistas en desarrollo móvil, web y software empresarial para impulsar tu negocio.
-                    </p>
-                    <div class="flex flex-wrap gap-4 mt-10">
-                        <button class="bg-primary-500 hover:bg-primary-600 text-white px-8 py-3 rounded-lg font-medium text-lg transition transform hover:-translate-y-1">
-                            Nuestros Proyectos
-                        </button>
-                        <button class="border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-8 py-3 rounded-lg font-medium text-lg transition transform hover:-translate-y-1">
-                            Solicitar Demo
-                        </button>
-                    </div>
-                </div>
-                <div class="lg:w-1/2 flex justify-center">
-                    <div class="relative">
-                        <div class="absolute -inset-4 bg-primary-500 rounded-2xl opacity-20 blur-xl"></div>
-                        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-2 overflow-hidden">
-                            <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-80 md:h-96" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Servicios -->
-    <section id="servicios" class="py-20 bg-gray-100 dark:bg-slate-800">
-        <div class="max-w-7xl mx-auto px-6">
+    <!-- Sección de Servicios -->
+    <section id="services" class="py-20 px-6 bg-darker">
+        <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Nuestros <span class="text-primary-600">Servicios</span></h2>
-                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    Soluciones tecnológicas adaptadas a las necesidades de tu empresa
-                </p>
+                <h2 class="text-4xl font-bold mb-3">Nuestros <span class="gradient-text">Servicios</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Soluciones tecnológicas integrales adaptadas a las necesidades de tu negocio</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
-                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
+                <!-- Servicio 1 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                            <i class="fas fa-chart-line text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold ml-3">Análisis de Negocios</h3>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Desarrollo de Apps Móviles</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
-                        Creamos aplicaciones nativas e híbridas para iOS y Android con interfaces intuitivas y alto rendimiento.
-                    </p>
-                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Desarrollo iOS y Android
+                    <p class="text-gray-300 mb-4">Analizamos tus procesos empresariales para identificar oportunidades de transformación digital y mejoras en la productividad.</p>
+                    <ul class="text-gray-400 text-sm space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Consultoría de optimización de procesos
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            React Native y Flutter
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Evaluación de necesidades tecnológicas
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Integración con APIs
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Análisis de ROI para inversiones tecnológicas
                         </li>
                     </ul>
                 </div>
                 
-                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
-                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                        </svg>
+                <!-- Servicio 2 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fas fa-globe text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold ml-3">Desarrollo Web y de Apps</h3>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Desarrollo Web</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
-                        Sitios web y aplicaciones modernas con las últimas tecnologías para una experiencia de usuario excepcional.
-                    </p>
-                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            React, Angular y Vue.js
+                    <p class="text-gray-300 mb-4">Sitios web y aplicaciones personalizadas para todas las plataformas, desde páginas de aterrizaje simples hasta sistemas empresariales complejos.</p>
+                    <ul class="text-gray-400 text-sm space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Sitios web responsivos y PWAs
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Progressive Web Apps
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Apps nativas para iOS/Android
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            E-commerce y SaaS
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Apps de escritorio multiplataforma
                         </li>
                     </ul>
                 </div>
                 
-                <div class="card bg-white dark:bg-slate-700 rounded-xl p-8 shadow-lg">
-                    <div class="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-6">
-                        <svg class="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
+                <!-- Servicio 3 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                            <i class="fas fa-project-diagram text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold ml-3">Sistemas Empresariales</h3>
                     </div>
-                    <h3 class="text-xl font-bold mb-3">Software Empresarial</h3>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
-                        Soluciones personalizadas para optimizar procesos, mejorar la productividad y tomar decisiones basadas en datos.
-                    </p>
-                    <ul class="space-y-2 text-gray-600 dark:text-gray-300">
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Sistemas de gestión
+                    <p class="text-gray-300 mb-4">Soluciones completas de procesos empresariales, desde sistemas de citas hasta implementaciones completas de ERP.</p>
+                    <ul class="text-gray-400 text-sm space-y-2">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Soluciones personalizadas de CRM/ERP
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Automatización de procesos
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Sistemas de inventario y POS
                         </li>
-                        <li class="flex items-center">
-                            <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Dashboards y Business Intelligence
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-primary mr-2 mt-1 text-xs"></i>
+                            Sistemas de flujo de trabajo automatizados
                         </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Demos Interactivas -->
-    <section id="demo" class="py-20">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Demos <span class="text-secondary-600">Interactivas</span></h2>
-                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    Experimenta con algunos de los elementos UI que implementamos en nuestras aplicaciones
-                </p>
             </div>
             
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- Demo 1: Slider Personalizable -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
-                    <h3 class="text-2xl font-bold mb-6">Personalizador de UI</h3>
-                    <div class="space-y-6">
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-medium">Tamaño de Elementos</label>
-                                <span id="size-value" class="text-primary-500 font-bold">50%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="size-slider">
-                        </div>
-                        
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-medium">Opacidad</label>
-                                <span id="opacity-value" class="text-primary-500 font-bold">75%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="75" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="opacity-slider">
-                        </div>
-                        
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <label class="font-medium">Radio de Bordes</label>
-                                <span id="radius-value" class="text-primary-500 font-bold">8px</span>
-                            </div>
-                            <input type="range" min="0" max="20" value="8" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" id="radius-slider">
-                        </div>
+            <div class="mt-16 text-center">
+                <button class="animated-button px-8 py-4 rounded-xl text-lg font-bold">Obtén una Consulta Gratuita</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Hero -->
+    <section class="pt-32 pb-20 px-6">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-accent h-80 w-80 rounded-full opacity-10 blur-3xl"></div>
+                </div>
+                <h1 class="text-6xl md:text-8xl font-bold relative z-10">
+                    <span class="gradient-text">Vitrina</span> de Desarrolladores
+                </h1>
+                <p class="mt-6 text-xl text-gray-300 max-w-2xl mx-auto relative z-10">
+                    Experimenta componentes web y de aplicaciones de vanguardia construidos con tecnologías modernas.
+                    Diseñados para las experiencias digitales del mañana.
+                </p>
+                
+                <div class="mt-16 flex justify-center">
+                    <div class="w-full max-w-5xl gradient-border h-80 rounded-2xl overflow-hidden relative">
+                        <div id="hero-canvas" class="w-full h-full"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-darker via-transparent to-transparent"></div>
                     </div>
-                    
-                    <div class="mt-8 p-6 bg-gray-100 dark:bg-slate-700 rounded-lg flex justify-center">
-                        <div id="demo-element" class="w-32 h-32 bg-primary-500 flex items-center justify-center text-white font-bold" style="opacity: 0.75; border-radius: 8px;">
-                            Demo
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Demos -->
+    <section id="demos" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-3">Demos de <span class="gradient-text">Aplicaciones</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Prototipos interactivos de aplicaciones que muestran funcionalidades complejas en escenarios del mundo real</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tarjeta de Demo 1 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                            <i class="fas fa-chart-network text-xl"></i>
                         </div>
+                        <h3 class="text-xl font-semibold ml-3">Panel de Análisis</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">Visualización de datos en tiempo real con gráficos interactivos y métricas personalizadas.</p>
+                    <div class="mt-auto">
+                        <div class="h-40 rounded-lg bg-gray-800/50 mb-4 flex items-center justify-center relative">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="bg-accent h-40 w-40 rounded-full opacity-10 blur-2xl"></div>
+                            </div>
+                            <div class="relative grid grid-cols-3 gap-2 w-40">
+                                <div class="h-10 rounded bg-gradient-to-r from-accent to-primary"></div>
+                                <div class="h-6 rounded bg-gradient-to-r from-accent to-primary mt-4"></div>
+                                <div class="h-8 rounded bg-gradient-to-r from-accent to-primary mt-2"></div>
+                                <div class="h-12 rounded bg-gradient-to-r from-accent to-primary"></div>
+                                <div class="h-5 rounded bg-gradient-to-r from-accent to-primary mt-3"></div>
+                                <div class="h-14 rounded bg-gradient-to-r from-accent to-primary mt-1"></div>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:bg-primary/10 hover:border-primary/30 transition">Ver Demo</button>
                     </div>
                 </div>
                 
-                <!-- Demo 2: Dibujo Canvas -->
-                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8">
-                    <h3 class="text-2xl font-bold mb-6">Canvas de Dibujo</h3>
-                    <div class="flex flex-wrap gap-3 mb-4">
-                        <button id="draw-btn" class="px-4 py-2 bg-primary-500 text-white rounded-lg font-medium">Dibujar</button>
-                        <button id="erase-btn" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded-lg font-medium">Borrar</button>
-                        <button id="clear-btn" class="px-4 py-2 bg-gray-200 dark:bg-slate-700 rounded-lg font-medium">Limpiar</button>
-                        <div class="flex items-center">
-                            <label class="mr-2">Color:</label>
-                            <input type="color" id="draw-color" value="#0ea5e9" class="w-8 h-8 cursor-pointer">
+                <!-- Tarjeta de Demo 2 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                            <i class="fas fa-shopping-cart text-xl"></i>
                         </div>
-                        <div class="flex items-center">
-                            <label class="mr-2">Grosor:</label>
-                            <input type="range" min="1" max="20" value="5" id="draw-width" class="w-24">
-                        </div>
+                        <h3 class="text-xl font-semibold ml-3">Plataforma de E-Commerce</h3>
                     </div>
-                    
-                    <div class="border border-gray-300 dark:border-slate-600 rounded-lg p-1">
-                        <canvas id="drawing-canvas" class="drawing-canvas w-full h-80"></canvas>
+                    <p class="text-gray-300 mb-4">Experiencia de compra completa con carrito, pago y navegación de productos.</p>
+                    <div class="mt-auto">
+                        <div class="h-40 rounded-lg bg-gray-800/50 mb-4 flex items-center justify-center relative">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="bg-primary h-40 w-40 rounded-full opacity-10 blur-2xl"></div>
+                            </div>
+                            <div class="relative w-40 flex flex-col items-center">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-r from-accent to-primary mb-3"></div>
+                                <div class="h-4 w-32 bg-gradient-to-r from-accent to-primary rounded mb-1"></div>
+                                <div class="h-4 w-20 bg-gradient-to-r from-accent to-primary rounded mb-3"></div>
+                                <div class="h-8 w-24 bg-gradient-to-r from-accent to-primary rounded"></div>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:bg-primary/10 hover:border-primary/30 transition">Ver Demo</button>
+                    </div>
+                </div>
+                
+                <!-- Tarjeta de Demo 3 -->
+                <div class="card-gradient rounded-2xl p-6 app-card transition-transform duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400">
+                            <i class="fas fa-comments text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold ml-3">Suite de Colaboración</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">Colaboración en equipo en tiempo real con chat, intercambio de documentos y gestión de tareas.</p>
+                    <div class="mt-auto">
+                        <div class="h-40 rounded-lg bg-gray-800/50 mb-4 flex items-center justify-center relative">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="bg-green-500 h-40 w-40 rounded-full opacity-10 blur-2xl"></div>
+                            </div>
+                            <div class="relative w-40 flex">
+                                <div>
+                                    <div class="h-8 w-8 rounded-full bg-gradient-to-r from-green-400 to-primary mb-2"></div>
+                                    <div class="h-4 w-24 bg-green-500/50 rounded"></div>
+                                </div>
+                                <div class="ml-2">
+                                    <div class="h-6 w-32 bg-gradient-to-r from-green-400 to-primary rounded mb-1"></div>
+                                    <div class="h-12 w-4 bg-gradient-to-r from-green-400 to-primary rounded float-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:bg-primary/10 hover:border-primary/30 transition">Ver Demo</button>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Nosotros -->
-    <section id="nosotros" class="py-20 bg-gray-100 dark:bg-slate-800">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex flex-col lg:flex-row items-center gap-12">
-                <div class="lg:w-1/2">
-                    <div class="relative">
-                        <div class="absolute -inset-4 bg-secondary-500 rounded-2xl opacity-10 blur-xl"></div>
-                        <div class="relative bg-white dark:bg-slate-700 rounded-2xl shadow-xl overflow-hidden">
-                            <div class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-80" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="lg:w-1/2">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-6">Sobre <span class="text-primary-600">Urbanus.IO</span></h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                        Somos un equipo apasionado de desarrolladores, diseñadores y estrategas digitales con sede en el corazón de Puerto Rico.
-                    </p>
-                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-6">
-                        Desde 2015, hemos estado creando soluciones digitales que transforman negocios y mejoran la vida de las personas. Combinamos la creatividad caribeña con tecnología de vanguardia para ofrecer productos excepcionales.
-                    </p>
-                    
-                    <div class="grid grid-cols-2 gap-6 mt-8">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg">+150 Proyectos</h4>
-                                <p class="text-gray-600 dark:text-gray-300">Entregados con éxito</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg">+50 Clientes</h4>
-                                <p class="text-gray-600 dark:text-gray-300">En Puerto Rico y EEUU</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg">100K+ Descargas</h4>
-                                <p class="text-gray-600 dark:text-gray-300">En tiendas de apps</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                <svg class="w-6 h-6 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-lg">Seguridad</h4>
-                                <p class="text-gray-600 dark:text-gray-300">Certificaciones de protección</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contacto -->
-    <section id="contacto" class="py-20">
-        <div class="max-w-7xl mx-auto px-6">
+    <!-- Widgets Section -->
+    <section id="widgets" class="py-20 px-6 bg-darker">
+        <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4">Contácta a <span class="text-primary-600">Urbanus.IO</span></h2>
-                <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                ¿Listo para transformar tu idea en una solución digital? ¡Hablemos!
-                </p>
+                <h2 class="text-4xl font-bold mb-3">Desarrollo de <span class="gradient-text">Widgets</span> Personalizados</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Componentes de interfaz personalizados construidos según tus especificaciones exactas</p>
             </div>
             
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="card-gradient rounded-2xl p-8 max-w-3xl mx-auto">
+                <h3 class="text-2xl font-bold mb-6">Desarrollo de Widgets Personalizados</h3>
+                <p class="text-gray-300 mb-6">
+                    Nos especializamos en construir widgets y componentes de interfaz personalizados adaptados a las necesidades de tu aplicación.
+                    Nuestros widgets están diseñados pensando en el rendimiento y la accesibilidad, utilizando tecnologías web modernas.
+                </p>
+                
+                <div class="grid grid-cols-2 gap-6">
                     <div>
-                        <h3 class="text-xl font-bold mb-6">Información de Contacto</h3>
+                        <h4 class="font-semibold mb-3 text-primary">Tipos Comunes de Widgets</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-primary mr-2"></i>
+                                Visualizaciones de Datos Interactivas
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-primary mr-2"></i>
+                                Controles de Formularios e Inputs
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-primary mr-2"></i>
+                                Componentes de Navegación
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-primary mr-2"></i>
+                                Reproductores de Medios y Visores
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-3 text-accent">Características Clave</h4>
+                        <ul class="space-y-2 text-gray-400">
+                            <li class="flex items-center">
+                                <i class="fas fa-bolt text-accent mr-2"></i>
+                                Diseño Responsivo
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-bolt text-accent mr-2"></i>
+                                Listo para Accesibilidad
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-bolt text-accent mr-2"></i>
+                                Agnóstico de Framework
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-bolt text-accent mr-2"></i>
+                                Optimizado para Rendimiento
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button class="animated-button px-8 py-3 rounded-lg">Solicitar Desarrollo de Widget</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- UI Examples Section -->
+    <section id="ui" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-3">Ejemplos Modernos de <span class="gradient-text">UI</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Interfaces excepcionales que demuestran principios de diseño moderno</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div>
+                    <div class="card-gradient rounded-2xl p-6 mb-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Componentes de Formularios Dinámicos</h3>
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                        </div>
                         <div class="space-y-4">
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                    </svg>
+                            <div class="flex items-center p-3 bg-gray-800/30 rounded-lg">
+                                <div class="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent mr-3">
+                                    <i class="fas fa-user"></i>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold">Teléfono</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">+1 (787) 555-0123</p>
+                                <input type="text" placeholder="Nombre completo" class="bg-transparent w-full focus:outline-none">
+                            </div>
+                            
+                            <div class="flex items-center p-3 bg-gray-800/30 rounded-lg">
+                                <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <input type="email" placeholder="Correo electrónico" class="bg-transparent w-full focus:outline-none">
+                            </div>
+                            
+                            <div class="flex items-center p-3 bg-gray-800/30 rounded-lg">
+                                <div class="w-8 h-8 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 mr-3">
+                                    <i class="fas fa-lock"></i>
+                                </div>
+                                <input type="password" placeholder="Crear contraseña" class="bg-transparent w-full focus:outline-none">
+                                <button class="text-gray-400 hover:text-white">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between pt-4">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="terms" class="w-4 h-4 text-primary rounded">
+                                    <label for="terms" class="ml-2 text-sm">Aceptar términos y privacidad</label>
                                 </div>
                             </div>
                             
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold">Email</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">contacto@urbanus.io</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-start">
-                                <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mr-4">
-                                    <svg class="w-5 h-5 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h4 class="font-bold">Oficina</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">San Juan, Puerto Rico</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8">
-                            <h4 class="font-bold mb-4">Síguenos</h4>
-                            <div class="flex space-x-4">
-                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                                    </svg>
-                                </a>
-                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm-2 15v-4H7v-4h3V8.012C10 6.55 10.812 5 13 5c1.2 0 1.802.4 1.802.4L14 8h-1.5c-.594 0-1.5.15-1.5 1.2V11h3.5l-.5 4h-3v6z"></path>
-                                    </svg>
-                                </a>
-                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.521 8.521 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.44 20.29 5.7 21 8.12 21 16 21 20.33 14.46 20.33 8.79c0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"></path>
-                                    </svg>
-                                </a>
-                                <a href="#" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center hover:bg-primary-500 hover:text-white transition">
-                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10 5.523 0 10-4.477 10-10 0-5.523-4.477-10-10-10zm-2 15v-6H7v6h3zm-1.5-7.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 7.268h-3v-3.5c0-1.4-.5-2.4-1.8-2.4-1 0-1.6.7-1.9 1.3-.1.2-.1.5-.1.7v3.9h-3V9h3v1.8c.6-.9 1.6-1.8 3.5-1.8 2.3 0 4 1.5 4 4.7v5.3z"></path>
-                                    </svg>
-                                </a>
-                            </div>
+                            <button class="animated-button w-full py-3 rounded-lg text-white font-bold mt-4">Crear Cuenta</button>
                         </div>
                     </div>
                     
-                    <div>
-                        <h3 class="text-xl font-bold mb-6">Envíanos un Mensaje</h3>
-                        <form>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="name">Nombre</label>
-                                <input type="text" id="name" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <div class="card-gradient rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Componentes de Tarjetas</h3>
+                            <div class="flex items-center text-gray-400">
+                                <span class="text-xs mr-2">4 elementos</span>
+                                <div class="w-8 h-5 rounded-full bg-gray-700 relative">
+                                    <div class="absolute w-3 h-3 rounded-full bg-primary top-1 left-1"></div>
+                                </div>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="email">Email</label>
-                                <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent mr-3">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold">Factura #4258</h4>
+                                        <p class="text-xs text-gray-400">Enviado hace 3 horas</p>
+                                    </div>
+                                </div>
+                                <span class="text-primary font-semibold">$245.00</span>
                             </div>
-                            <div class="mb-4">
-                                <label class="block text-gray-700 dark:text-gray-300 mb-2" for="message">Mensaje</label>
-                                <textarea id="message" rows="4" class="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
+                            
+                            <div class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center text-green-400 mr-3">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold">Activos del Proyecto</h4>
+                                        <p class="text-xs text-gray-400">Actualizado ayer</p>
+                                    </div>
+                                </div>
+                                <span class="text-gray-400">12 archivos</span>
                             </div>
-                            <button type="submit" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 rounded-lg transition">
-                                Enviar Mensaje
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-8">
+                    <div class="card-gradient rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Botones Interactivos</h3>
+                            <div class="flex space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+                                <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+                                <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <button class="py-3 px-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:bg-accent/10 hover:border-accent/30 transition">Estándar</button>
+                            <button class="py-3 px-4 rounded-lg bg-accent/10 border border-accent/30 text-accent hover:bg-accent/20 transition">Acento</button>
+                            <button class="py-3 px-4 rounded-lg gradient-button bg-gradient-to-r from-accent to-primary text-darker font-semibold hover:opacity-90">Gradiente</button>
+                            <button class="py-3 px-4 rounded-lg flex items-center justify-center space-x-2 bg-gray-800/50 border border-gray-700 hover:border-primary/30">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span>Botón con Icono</span>
                             </button>
-                        </form>
+                            <button class="py-3 px-4 rounded-lg bg-gray-800/50 border border-dashed border-gray-600 hover:border-primary/50">Contorno</button>
+                            <button class="py-3 px-4 rounded-lg flex justify-center">
+                                <span class="h-1 w-6 bg-gray-400 rounded"></span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-gradient rounded-2xl p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-semibold">Elementos de Notificación</h3>
+                            <span class="text-xs px-2 py-1 bg-primary/10 text-primary rounded">Nuevo</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                                <div class="flex">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                                            <i class="fas fa-info text-xs text-darker"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-primary font-medium">Actualización de producto disponible</p>
+                                        <p class="text-xs text-primary/70 mt-1">La versión 2.1 está lista para instalar</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                                <div class="flex">
+                                    <div class="flex-shrink-0 mt-1">
+                                        <div class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                                            <i class="fas fa-check text-xs text-darker"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-green-400 font-medium">Notificación de éxito</p>
+                                        <p class="text-xs text-green-500/70 mt-1">Tus configuraciones han sido guardadas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 text-white py-12">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <div class="bg-primary-500 w-8 h-8 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold">U</span>
+    <!-- Interactive Elements Section -->
+    <section id="interactive" class="py-20 px-6 bg-darker">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-3">Componentes <span class="gradient-text">Interactivos</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Elementos atractivos que responden a las interacciones del usuario</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                <div class="card-gradient rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Pestañas y Acordeones</h3>
+                    
+                    <!-- Pestañas -->
+                    <div class="mb-8">
+                        <div class="flex border-b border-gray-700">
+                            <button class="px-4 py-2 font-medium text-gray-400 hover:text-white border-b-2 border-transparent relative group">
+                                Resumen
+                                <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                            </button>
+                            <button class="px-4 py-2 font-medium text-gray-400 hover:text-white border-b-2 border-transparent relative group">
+                                Documentación
+                                <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                            </button>
+                            <button class="px-4 py-2 font-medium text-gray-400 hover:text-white border-b-2 border-transparent relative group active-tab">
+                                Configuración
+                                <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary"></span>
+                            </button>
                         </div>
-                        <span class="text-xl font-bold text-white">Urbanus<span class="text-secondary-400">.IO</span></span>
+                        
+                        <div class="mt-4">
+                            <h4 class="font-semibold mb-2">Configuración del Componente</h4>
+                            <p class="text-sm text-gray-400">Configura la interactividad y las preferencias visuales</p>
+                            
+                            <div class="mt-4 space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span>Habilitar animaciones</span>
+                                    <label class="switch">
+                                        <input type="checkbox" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span>Preferencia de modo oscuro</span>
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex justify-between items-center">
+                                    <span>Reducir movimiento</span>
+                                    <label class="switch">
+                                        <input type="checkbox">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p class="text-gray-400 mb-4">
-                        Desarrollando el futuro digital de Puerto Rico.
-                    </p>
-                    <p class="text-gray-400">
-                        &copy; 2023 Urbanus.IO. Todos los derechos reservados.
-                    </p>
+                    
+                    <!-- Acordeón -->
+                    <div>
+                        <div class="accordion-item border-b border-gray-700 pb-4 mb-4">
+                            <button class="w-full flex justify-between items-center py-2 text-left">
+                                <span class="font-medium">Configuraciones Avanzadas</span>
+                                <i class="fas fa-chevron-down transform transition-transform"></i>
+                            </button>
+                            <div class="mt-2 text-sm text-gray-400 hidden">
+                                <p>Accede a opciones de control más detalladas para personalizar el comportamiento y la apariencia del componente.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item border-b border-gray-700 pb-4">
+                            <button class="w-full flex justify-between items-center py-2 text-left">
+                                <span class="font-medium">Opciones de Integración</span>
+                                <i class="fas fa-chevron-down transform transition-transform"></i>
+                            </button>
+                            <div class="mt-2 text-sm text-gray-400 hidden">
+                                <p>Conéctate con servicios de terceros y otros componentes en tu aplicación.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Enlaces Rápidos</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#inicio" class="text-gray-400 hover:text-white transition">Inicio</a></li>
-                        <li><a href="#servicios" class="text-gray-400 hover:text-white transition">Servicios</a></li>
-                        <li><a href="#demo" class="text-gray-400 hover:text-white transition">Demos</a></li>
-                        <li><a href="#nosotros" class="text-gray-400 hover:text-white transition">Nosotros</a></li>
-                        <li><a href="#contacto" class="text-gray-400 hover:text-white transition">Contacto</a></li>
-                    </ul>
+                <div class="card-gradient rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Controles Personalizados</h3>
+                    
+                    <!-- Deslizador -->
+                    <div class="mb-8">
+                        <div class="flex justify-between mb-2">
+                            <span>Nivel de Volumen</span>
+                            <span class="bg-gray-800 rounded-full px-2 text-sm">75%</span>
+                        </div>
+                        <div class="h-2 bg-gray-800 rounded-full relative">
+                            <div class="absolute h-full rounded-full bg-gradient-to-r from-accent to-primary" style="width: 75%"></div>
+                            <div class="absolute w-4 h-4 rounded-full bg-primary top-1/2 transform -translate-y-1/2" style="left: 75%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicadores de progreso -->
+                    <div class="mb-8">
+                        <div class="flex justify-between mb-2">
+                            <span>Progreso de Carga</span>
+                            <span class="text-sm text-gray-400">65%</span>
+                        </div>
+                        <div class="h-3 bg-gray-800 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-accent to-primary" style="width: 65%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between mb-2">
+                            <span>Tareas en Proceso</span>
+                            <span class="text-sm text-gray-400">3/5 completadas</span>
+                        </div>
+                        <div class="bg-gray-800 rounded-full h-6 overflow-hidden relative">
+                            <div class="h-full rounded-full bg-gradient-to-r from-green-500 to-primary" style="width: 60%"></div>
+                            <div class="absolute inset-0 flex items-center justify-center text-xs font-medium">Procesando...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alternar -->
+                    <div class="mt-8 flex items-center justify-center">
+                        <div class="flex items-center p-4 bg-gray-800/30 rounded-2xl">
+                            <span class="mr-4">Habilitar Notificaciones</span>
+                            <label class="switch large">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Servicios</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Apps Móviles</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Desarrollo Web</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Software Empresarial</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">UI/UX Design</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Consultoría Tecnológica</a></li>
-                    </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coding Examples Section -->
+    <section id="examples" class="py-20 px-6 bg-darker">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-3">Ejemplos Interactivos de <span class="gradient-text">Código</span></h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Demostraciones prácticas de tecnologías web</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Pizarra de Dibujo -->
+                <div class="card-gradient rounded-2xl p-6">
+                    <h3 class="text-xl font-semibold mb-4">Pizarra de Dibujo</h3>
+                    <p class="text-gray-300 mb-4">Dibuja en el lienzo de abajo usando tu mouse o toque</p>
+                    <canvas id="drawing-pad" class="w-full h-64 bg-gray-800/50 rounded-lg cursor-crosshair"></canvas>
+                    <div class="mt-4 flex gap-2">
+                        <button id="clear-drawing" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-red-500/10 transition">Limpiar</button>
+                        <input type="color" id="drawing-color" value="#00ff9d" class="h-10 w-10 cursor-pointer">
+                        <input type="range" id="brush-size" min="1" max="20" value="5" class="flex-1">
+                    </div>
                 </div>
-                
-                <div>
-                    <h4 class="text-lg font-bold mb-4">Suscríbete</h4>
-                    <p class="text-gray-400 mb-4">
-                        Recibe las últimas novedades sobre tecnología y desarrollo.
-                    </p>
-                    <div class="flex">
-                        <input type="email" placeholder="Tu email" class="px-4 py-2 rounded-l-lg w-full text-gray-800">
-                        <button class="bg-primary-500 hover:bg-primary-600 px-4 py-2 rounded-r-lg font-medium">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                            </svg>
+
+                <!-- Demo de Google Maps -->
+                <div class="card-gradient rounded-2xl p-6">
+                    <h3 class="text-xl font-semibold mb-4">Integración de Google Maps</h3>
+                    <p class="text-gray-300 mb-4">Mapa interactivo con marcadores personalizados y controles</p>
+                    <div id="map-container" class="w-full h-64 bg-gray-800/50 rounded-lg flex items-center justify-center">
+                        <button id="load-map" class="px-6 py-3 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/30 text-primary font-medium">
+                            Cargar Mapa
                         </button>
                     </div>
+                    <div class="mt-4 flex gap-2">
+                        <button id="add-marker" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-primary/10 transition" disabled>Agregar Marcador</button>
+                        <button id="center-map" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-primary/10 transition" disabled>Centrar Mapa</button>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Controlador de Formas Dinámico -->
+            <div class="card-gradient rounded-2xl p-6 mt-10">
+                <h3 class="text-xl font-semibold mb-4">Controlador Dinámico de Formas</h3>
+                <p class="text-gray-300 mb-4">Ajusta los deslizadores para modificar las propiedades de la forma</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div id="shape-demo" class="w-full h-64 bg-gray-800/50 rounded-lg flex items-center justify-center">
+                        <canvas id="shape-canvas" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block mb-2">Tipo de Forma</label>
+                            <select id="shape-type" class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2">
+                                <option value="circle">Círculo</option>
+                                <option value="rectangle">Rectángulo</option>
+                                <option value="triangle">Triángulo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-2">Tamaño: <span id="size-value">50</span>px</label>
+                            <input type="range" id="shape-size" min="10" max="150" value="50" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block mb-2">Rotación: <span id="rotation-value">0</span>°</label>
+                            <input type="range" id="shape-rotation" min="0" max="360" value="0" class="w-full">
+                        </div>
+                        <div>
+                            <label class="block mb-2">Color</label>
+                            <input type="color" id="shape-color" value="#5765ff" class="w-full h-10 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Vitrina 3D -->
+    <section id="3d" class="py-20 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-3">Visualizaciones <span class="gradient-text">3D</span> Impulsadas por Three.js</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Experiencias inmersivas creadas con tecnología WebGL</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div class="threejs-container rounded-xl feature-pulse">
+                    <div id="shape-showcase" class="w-full h-full"></div>
+                </div>
+                
+                <div>
+                    <div class="card-gradient rounded-2xl p-6">
+                        <h3 class="text-xl font-semibold mb-4">Experiencia 3D Interactiva</h3>
+                        <p class="text-gray-300 mb-6">
+                            Nuestra implementación de Three.js crea visualizaciones 3D en tiempo real que funcionan eficientemente incluso en dispositivos móviles. 
+                            Estas tecnologías nos permiten construir vitrinas de productos, visualizaciones arquitectónicas y pantallas de datos interactivas.
+                        </p>
+                        
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent mx-auto mb-3">
+                                    <i class="fas fa-cube"></i>
+                                </div>
+                                <p class="text-sm">Geometría Procedural</p>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-3">
+                                    <i class="fas fa-lightbulb"></i>
+                                </div>
+                                <p class="text-sm">Iluminación Dinámica</p>
+                            </div>
+                            
+                            <div class="text-center p-4 bg-gray-800/30 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 mx-auto mb-3">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <p class="text-sm">Interacción en Tiempo Real</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-medium mb-2">Pruébalo:</h4>
+                            <div class="flex flex-wrap gap-2">
+                                <button data-shape="sphere" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-accent/10 transition">Esfera</button>
+                                <button data-shape="torus" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-accent/10 transition">Toro</button>
+                                <button data-shape="cube" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-accent/10 transition">Cubo</button>
+                                <button data-shape="cone" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-accent/10 transition">Cono</button>
+                                <button data-shape="random" class="px-4 py-2 rounded-lg bg-gray-800/50 hover:bg-accent/10 transition">Aleatorio</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Llamado a la Acción -->
+    <section class="py-20 px-6 bg-darker">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-primary h-60 w-60 rounded-full opacity-10 blur-3xl"></div>
+                </div>
+                <div class="relative z-10">
+                    <h2 class="text-4xl md:text-5xl font-bold mb-6">¿Listo para construir algo <span class="gradient-text">increíble?</span></h2>
+                    <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-10">
+                        urbanus.IO empodera a los desarrolladores para crear experiencias digitales impresionantes con tecnología de vanguardia.
+                    </p>
+                    <div class="flex justify-center">
+                        <button class="animated-button font-bold py-4 px-8 rounded-xl text-lg">Ver Documentación</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de Página -->
+    <footer class="py-10 px-6 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-6 md:mb-0">
+                    <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                        <span class="font-bold text-darker">U</span>
+                    </div>
+                    <span class="text-xl font-bold">urbanus<span class="text-primary">.IO</span></span>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-6">
+                    <a href="#" class="hover:text-primary transition">Demos</a>
+                    <a href="#" class="hover:text-primary transition">Documentación</a>
+                    <a href="#" class="hover:text-primary transition">Precios</a>
+                    <a href="#" class="hover:text-primary transition">Carreras</a>
+                    <a href="#" class="hover:text-primary transition">Blog</a>
+                </div>
+                
+                <div class="mt-6 md:mt-0 flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center hover:text-primary">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center hover:text-primary">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center hover:text-primary">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="mt-10 pt-6 text-center text-gray-500 border-t border-gray-800">
+                <p>&copy; 2023 urbanus.IO. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
 
+    <!-- Scripts de Three.js -->
     <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
+        // Inicializar escena de Three.js para el hero
+        const initHeroScene = () => {
+            const canvas = document.getElementById('hero-canvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            canvas.appendChild(renderer.domElement);
+            
+            camera.position.z = 5;
+            
+            // Crear partículas orbitantes
+            const particles = [];
+            const particleCount = 300;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const size = Math.random() * 0.1 + 0.01;
+                const geometry = new THREE.SphereGeometry(size, 16, 16);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: new THREE.Color(Math.random() * 0xffffff) 
+                });
+                const particle = new THREE.Mesh(geometry, material);
                 
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    const offset = 80; // Adjust for fixed header
-                    const elementPosition = targetElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-                    window.scrollTo({
-                        top: offsetPosition,
-                        behavior: 'smooth'
-                    });
+                particle.position.set(
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10,
+                    (Math.random() - 0.5) * 10
+                );
+                
+                particle.velocity = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.005,
+                    (Math.random() - 0.5) * 0.005,
+                    (Math.random() - 0.5) * 0.005
+                );
+                
+                particles.push(particle);
+                scene.add(particle);
+            }
+            
+            // Crear una forma central
+            const centralGeometry = new THREE.IcosahedronGeometry(1.2, 2);
+            const centralMaterial = new THREE.MeshStandardMaterial({
+                color: 0x00ff9d,
+                wireframe: false,
+                transparent: true,
+                opacity: 0.8,
+                emissive: new THREE.Color(0x00ff9d),
+                emissiveIntensity: 0.2
+            });
+            
+            const centralShape = new THREE.Mesh(centralGeometry, centralMaterial);
+            scene.add(centralShape);
+            
+            // Agregar luces
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x00ff9d, 0.8);
+            directionalLight.position.set(2, 2, 2);
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x5765ff, 1);
+            pointLight.position.set(-2, -2, -2);
+            scene.add(pointLight);
+            
+            // Bucle de animación
+            let rotationSpeed = 0.002;
+            let time = 0;
+            
+            const animate = () => {
+                requestAnimationFrame(animate);
+                
+                // Rotar forma central
+                centralShape.rotation.x += rotationSpeed;
+                centralShape.rotation.y += rotationSpeed * 0.8;
+                
+                // Animar partículas
+                time += 0.01;
+                
+                particles.forEach(particle => {
+                    particle.position.x += particle.velocity.x * Math.sin(time);
+                    particle.position.y += particle.velocity.y * Math.cos(time);
+                    particle.position.z += particle.velocity.z * Math.tan(time);
+                    
+                    // Restringir partículas a un volumen
+                    if (Math.abs(particle.position.x) > 5) particle.velocity.x *= -1;
+                    if (Math.abs(particle.position.y) > 5) particle.velocity.y *= -1;
+                    if (Math.abs(particle.position.z) > 5) particle.velocity.z *= -1;
+                });
+                
+                renderer.render(scene, camera);
+            };
+            
+            // Manejar cambio de tamaño de ventana
+            window.addEventListener('resize', () => {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+            
+            animate();
+        };
+        
+        // Inicializar escena de formas
+        const initShapesScene = () => {
+            const canvas = document.getElementById('shape-showcase');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            canvas.appendChild(renderer.domElement);
+            
+            camera.position.z = 5;
+            
+            // Luces
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0x00ff9d, 0.8);
+            directionalLight.position.set(3, 3, 3);
+            scene.add(directionalLight);
+            
+            const pointLight = new THREE.PointLight(0x5765ff, 0.8);
+            pointLight.position.set(-3, -2, 2);
+            scene.add(pointLight);
+            
+            // Materiales
+            const materials = [
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x00ff9d,
+                    wireframe: true,
+                    transparent: false,
+                    opacity: 0.1,
+                    emissive: new THREE.Color(0x00ff9d),
+                    emissiveIntensity: 0.1
+                }),
+                new THREE.MeshStandardMaterial({ 
+                    color: 0x5765ff,
+                    transparent: true,
+                    opacity: 0.8,
+                    emissive: new THREE.Color(0x5765ff),
+                    emissiveIntensity: 0.1
+                }),
+                new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    metalness: 0.4,
+                    roughness: 0.3,
+                    clearcoat: 1,
+                    clearcoatRoughness: 0.2,
+                    transmission: 0.8
+                })
+            ];
+            
+            // Prototipos de formas
+            const shapes = {
+                sphere: new THREE.SphereGeometry(1.5, 32, 32),
+                torus: new THREE.TorusGeometry(1.5, 0.4, 16, 50),
+                cube: new THREE.BoxGeometry(1.8, 1.8, 1.8),
+                cone: new THREE.ConeGeometry(1.5, 2.5, 32),
+            };
+            
+            // Crear forma inicial
+            let currentShape = new THREE.Mesh(shapes.sphere, materials[0]);
+            scene.add(currentShape);
+            
+            // Bucle de animación
+            const animate = () => {
+                requestAnimationFrame(animate);
+                currentShape.rotation.x += 0.005;
+                currentShape.rotation.y += 0.007;
+                renderer.render(scene, camera);
+            };
+            
+            animate();
+            
+            // Funcionalidad de cambio de forma
+            document.querySelectorAll('[data-shape]').forEach(button => {
+                button.addEventListener('click', () => {
+                    const shapeType = button.getAttribute('data-shape');
+                    
+                    // Eliminar forma actual
+                    scene.remove(currentShape);
+                    
+                    if (shapeType === 'random') {
+                        const randomShapes = Object.keys(shapes);
+                        const randomShapeType = randomShapes[Math.floor(Math.random() * randomShapes.length)];
+                        currentShape = new THREE.Mesh(shapes[randomShapeType], materials[Math.floor(Math.random() * materials.length)]);
+                    } else {
+                        currentShape = new THREE.Mesh(shapes[shapeType], materials[Math.floor(Math.random() * materials.length)]);
+                    }
+                    
+                    scene.add(currentShape);
+                });
+            });
+            
+            // Manejar cambio de tamaño de ventana
+            window.addEventListener('resize', () => {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+        };
+        
+        // Lógica de alternar interruptor
+        document.querySelectorAll('.switch').forEach(switchEl => {
+            const input = switchEl.querySelector('input');
+            const slider = switchEl.querySelector('.slider');
+            
+            input.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    slider.style.backgroundColor = '#00ff9d';
+                    slider.style.transform = 'translateX(100%)';
+                } else {
+                    slider.style.backgroundColor = '#4b5563';
+                    slider.style.transform = 'translateX(0)';
                 }
             });
         });
-
-        // Toggle de tema oscuro/claro
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeIcon = document.getElementById('theme-icon');
-        const themePath = document.getElementById('theme-path');
         
-        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-            themePath.setAttribute('d', 'M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-        
-        themeToggle.addEventListener('click', function() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('color-theme', 'light');
-                themePath.setAttribute('d', 'M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('color-theme', 'dark');
-                themePath.setAttribute('d', 'M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z');
-            }
-        });
-        
-        // Demo de slider personalizable
-        const sizeSlider = document.getElementById('size-slider');
-        const opacitySlider = document.getElementById('opacity-slider');
-        const radiusSlider = document.getElementById('radius-slider');
-        const sizeValue = document.getElementById('size-value');
-        const opacityValue = document.getElementById('opacity-value');
-        const radiusValue = document.getElementById('radius-value');
-        const demoElement = document.getElementById('demo-element');
-        
-        sizeSlider.addEventListener('input', function() {
-            const value = sizeSlider.value;
-            sizeValue.textContent = `${value}%`;
-            const size = 80 + (value * 1.2);
-            demoElement.style.width = `${size}px`;
-            demoElement.style.height = `${size}px`;
-        });
-        
-        opacitySlider.addEventListener('input', function() {
-            const value = opacitySlider.value;
-            opacityValue.textContent = `${value}%`;
-            demoElement.style.opacity = value / 100;
-        });
-        
-        radiusSlider.addEventListener('input', function() {
-            const value = radiusSlider.value;
-            radiusValue.textContent = `${value}px`;
-            demoElement.style.borderRadius = `${value}px`;
-        });
-        
-        // Demo de dibujo en canvas
-        const canvas = document.getElementById('drawing-canvas');
-        const ctx = canvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
-        let drawColor = '#0ea5e9';
-        let drawWidth = 5;
-        
-        // Ajustar tamaño del canvas
-        function resizeCanvas() {
+        // Implementación de Pizarra de Dibujo
+        const initDrawingPad = () => {
+            const canvas = document.getElementById('drawing-pad');
+            const ctx = canvas.getContext('2d');
+            const clearBtn = document.getElementById('clear-drawing');
+            const colorPicker = document.getElementById('drawing-color');
+            const brushSize = document.getElementById('brush-size');
+            
+            // Establecer tamaño del lienzo
             canvas.width = canvas.offsetWidth;
             canvas.height = canvas.offsetHeight;
-        }
-        
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
-        // Configurar estilo inicial
-        ctx.strokeStyle = drawColor;
-        ctx.lineWidth = drawWidth;
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        
-        // Funciones de dibujo
-        function startDrawing(e) {
-            isDrawing = true;
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
-        
-        function draw(e) {
-            if (!isDrawing) return;
             
-            ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(e.offsetX, e.offsetY);
-            ctx.stroke();
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
             
-            [lastX, lastY] = [e.offsetX, e.offsetY];
-        }
-        
-        function stopDrawing() {
-            isDrawing = false;
-        }
-        
-        // Event listeners para dibujar
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
-        
-        // Botones de dibujo
-        document.getElementById('draw-btn').addEventListener('click', function() {
-            ctx.strokeStyle = drawColor;
-            ctx.globalCompositeOperation = 'source-over';
-        });
-        
-        document.getElementById('erase-btn').addEventListener('click', function() {
-            ctx.strokeStyle = document.documentElement.classList.contains('dark') ? '#1e293b' : '#ffffff';
-            ctx.globalCompositeOperation = 'destination-out';
-        });
-        
-        document.getElementById('clear-btn').addEventListener('click', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-        
-        // Cambio de color y grosor
-        document.getElementById('draw-color').addEventListener('input', function(e) {
-            drawColor = e.target.value;
-            ctx.strokeStyle = drawColor;
-        });
-        
-        document.getElementById('draw-width').addEventListener('input', function(e) {
-            drawWidth = e.target.value;
-            ctx.lineWidth = drawWidth;
+            // Funciones de dibujo
+            function startDrawing(e) {
+                isDrawing = true;
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                ctx.strokeStyle = colorPicker.value;
+                ctx.lineWidth = brushSize.value;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                [lastX, lastY] = [e.offsetX, e.offsetY];
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            // Escuchadores de eventos
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Soporte táctil
+            canvas.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            canvas.addEventListener('touchend', () => {
+                const mouseEvent = new MouseEvent('mouseup');
+                canvas.dispatchEvent(mouseEvent);
+            });
+            
+            // Botón de limpiar
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            });
+        };
+
+        // Implementación de Google Maps
+        const initMapDemo = () => {
+            const mapContainer = document.getElementById('map-container');
+            const loadMapBtn = document.getElementById('load-map');
+            const addMarkerBtn = document.getElementById('add-marker');
+            const centerMapBtn = document.getElementById('center-map');
+            let map;
+            let markers = [];
+
+            loadMapBtn.addEventListener('click', () => {
+                // Create map container
+                mapContainer.innerHTML = '<div id="map" class="w-full h-full rounded-lg"></div>';
+
+                // Initialize Google Maps
+                const center = { lat: 37.7749, lng: -122.4194 }; // Default center (San Francisco)
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: center,
+                    zoom: 12,
+                });
+
+                // Enable buttons
+                loadMapBtn.style.display = 'none';
+                addMarkerBtn.disabled = false;
+                centerMapBtn.disabled = false;
+
+                // Add initial marker
+                const marker = new google.maps.Marker({
+                    position: center,
+                    map: map,
+                    title: "Default Location",
+                });
+                markers.push(marker);
+            });
+
+            addMarkerBtn.addEventListener('click', () => {
+                // Add a random marker
+                const randomLat = 37.7749 + (Math.random() - 0.5) * 0.1;
+                const randomLng = -122.4194 + (Math.random() - 0.5) * 0.1;
+                const marker = new google.maps.Marker({
+                    position: { lat: randomLat, lng: randomLng },
+                    map: map,
+                    title: "Random Marker",
+                });
+                markers.push(marker);
+            });
+
+            centerMapBtn.addEventListener('click', () => {
+                // Center the map on the default location
+                map.setCenter({ lat: 37.7749, lng: -122.4194 });
+                map.setZoom(12);
+            });
+        };
+
+        // Load Google Maps API
+        const loadGoogleMapsAPI = () => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMapDemo`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+        };
+
+        // Controlador Dinámico de Formas
+        const initShapeController = () => {
+            const canvas = document.getElementById('shape-canvas');
+            const ctx = canvas.getContext('2d');
+            const shapeType = document.getElementById('shape-type');
+            const shapeSize = document.getElementById('shape-size');
+            const sizeValue = document.getElementById('size-value');
+            const shapeRotation = document.getElementById('shape-rotation');
+            const rotationValue = document.getElementById('rotation-value');
+            const shapeColor = document.getElementById('shape-color');
+            
+            // Establecer tamaño del lienzo
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            
+            function drawShape() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(canvas.width/2, canvas.height/2);
+                ctx.rotate(parseInt(rotationValue.textContent) * Math.PI / 180);
+                ctx.fillStyle = shapeColor.value;
+                
+                switch(shapeType.value) {
+                    case 'circle':
+                        ctx.beginPath();
+                        ctx.arc(0, 0, parseInt(sizeValue.textContent)/2, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'rectangle':
+                        ctx.fillRect(
+                            -parseInt(sizeValue.textContent)/2, 
+                            -parseInt(sizeValue.textContent)/2, 
+                            parseInt(sizeValue.textContent), 
+                            parseInt(sizeValue.textContent)
+                        );
+                        break;
+                    case 'triangle':
+                        ctx.beginPath();
+                        const height = (Math.sqrt(3)/2) * parseInt(sizeValue.textContent);
+                        ctx.moveTo(0, -height/2);
+                        ctx.lineTo(-parseInt(sizeValue.textContent)/2, height/2);
+                        ctx.lineTo(parseInt(sizeValue.textContent)/2, height/2);
+                        ctx.closePath();
+                        ctx.fill();
+                        break;
+                }
+                
+                ctx.restore();
+            }
+            
+            // Escuchadores de eventos
+            shapeType.addEventListener('change', drawShape);
+            shapeSize.addEventListener('input', () => {
+                sizeValue.textContent = shapeSize.value;
+                drawShape();
+            });
+            shapeRotation.addEventListener('input', () => {
+                rotationValue.textContent = shapeRotation.value;
+                drawShape();
+            });
+            shapeColor.addEventListener('input', drawShape);
+            
+            // Dibujo inicial
+            drawShape();
+        };
+
+        // Inicializar escenas cuando la página se cargue
+        window.addEventListener('DOMContentLoaded', () => {
+            initHeroScene();
+            initShapesScene();
+            initDrawingPad();
+            loadGoogleMapsAPI();
+            initShapeController();
         });
     </script>
 </body>
